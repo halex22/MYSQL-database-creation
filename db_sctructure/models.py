@@ -21,21 +21,28 @@ class Country(Base):
     export_tax = Column(Float(), default=lambda: round(uniform(0.5, 1.5), 2))
     import_tax = Column(Float(), default=lambda: round(uniform(1.5, 7.6), 2))
     exports = relationship("Record", back_populates="exporter", foreign_keys="[Record.exporter_id]")
-    imports = relationship("Record", back_populates="importer", foreign_keys="[Record.import_id]")
+    imports = relationship("Record", back_populates="importer", foreign_keys="[Record.importer_id]")
+
+    def __repr__(self) -> str:
+        return f"Country: {self.name}"
 
 class Record(Base):
+
     __tablename__ = "records"
 
     id = Column(Integer, primary_key=True)
     exporter_id = Column(Integer, ForeignKey("countries.id"))
     exporter = relationship("Country", back_populates="exports", foreign_keys=[exporter_id])
-    import_id = Column(Integer, ForeignKey("countries.id"))
-    importer = relationship("Country", back_populates="imports", foreign_keys=[import_id])
+    importer_id = Column(Integer, ForeignKey("countries.id"))
+    importer = relationship("Country", back_populates="imports", foreign_keys=[importer_id])
     date = Column(DateTime())
     total_amount = Column(Float())
     net_amount = Column(Float())
     product_category = Column(String(length=25), nullable=False)
     shipping_method = Column(String(length=15), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"record n.{self.id}"
 
 
 if __name__ == "__main__":

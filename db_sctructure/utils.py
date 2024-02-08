@@ -2,7 +2,7 @@ from enum import StrEnum, auto
 from datetime import datetime
 from functools import partial
 from dataclasses import dataclass, field
-from random import randint, choice
+from random import randint, choice, randrange
 
 class Countries(StrEnum):
     UNATED_STATES = auto()
@@ -78,7 +78,8 @@ class DateGen:
         """
         while not self.is_valid_date:
             self.day -= 1
-        return datetime(year=self.year, month=self.month, day=self.day)
+        return datetime(year=self.year, month=self.month, day=self.day,
+                        hour=randint(10,23), minute=randint(10,59), second=randint(10,59))
 
 
 @dataclass
@@ -93,7 +94,22 @@ class CountriesSelector:
     def country_match(self):
         while self.exporter == self.importer:
             self.importer = choice(Countries._member_names_)
-    
+
+
+@dataclass
+class AmountCreator:
+    export_tax: float
+    import_tax: float
+    amount: int = field(default_factory= lambda: randrange(10_000,1_000_000, 10_000))
+
+
+    @property
+    def net_amount(self):
+        net_amount = self.amount * (self.export_tax / 100)
+        net_amount += self.amount * (self.import_tax / 100)
+        return net_amount + self.amount
+
+
     
 if __name__ == '__main__':
     date_gen = DateGen()
