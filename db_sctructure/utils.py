@@ -37,11 +37,6 @@ class TransportMethod(StrEnum):
     AIRCRAFT = auto()
 
 
-
-def country_selector():
-    return choice(Countries._member_names_)
-
-
 @dataclass
 class DateGen:
     year: bool = field(init=False)

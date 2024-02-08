@@ -1,13 +1,13 @@
-from sqlalchemy.orm import Session, DeclarativeBase, mapped_column, Mapped, relationship
+from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from sqlalchemy import create_engine
-from sqlalchemy import Integer, String, Float, Column, ForeignKey, DateTime
+from sqlalchemy import String, Float, Column, ForeignKey, DateTime, Integer
 from random import uniform
 from dotenv import load_dotenv
 from os import getenv
 
 load_dotenv()
 
-DATABASE_URI = f'mysql+mysqlconnector://{getenv("DB_USER")}:{getenv("DB_PASS")}@localhost/{getenv("DB_NAME")}'
+DATABASE_URI = getenv('DATABASE_URI')
 
 class Base(DeclarativeBase):
     pass
@@ -16,20 +16,21 @@ class Base(DeclarativeBase):
 class Country(Base):
     __tablename__ = "countries"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String(length=30), nullable=False, unique=True)
-    export_tax =  Column(Float(), default= lambda: round(uniform(0.5, 1.5),2))
-    import_tax = Column(Float(), default= lambda: round(uniform(1.5, 7.6),2))
-
+    export_tax = Column(Float(), default=lambda: round(uniform(0.5, 1.5), 2))
+    import_tax = Column(Float(), default=lambda: round(uniform(1.5, 7.6), 2))
+    exports = relationship("Record", back_populates="exporter", foreign_keys="[Record.exporter_id]")
+    imports = relationship("Record", back_populates="importer", foreign_keys="[Record.import_id]")
 
 class Record(Base):
     __tablename__ = "records"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    exporter_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
-    exporter: Mapped['Country'] = relationship(back_populates="exports")
-    import_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
-    importer: Mapped['Country'] = relationship(back_populates="imports")
+    id = Column(Integer, primary_key=True)
+    exporter_id = Column(Integer, ForeignKey("countries.id"))
+    exporter = relationship("Country", back_populates="exports", foreign_keys=[exporter_id])
+    import_id = Column(Integer, ForeignKey("countries.id"))
+    importer = relationship("Country", back_populates="imports", foreign_keys=[import_id])
     date = Column(DateTime())
     total_amount = Column(Float())
     net_amount = Column(Float())
